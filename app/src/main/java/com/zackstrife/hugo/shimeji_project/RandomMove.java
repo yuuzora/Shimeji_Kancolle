@@ -10,9 +10,7 @@ import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
-/**
- * Created by ZackStrife on 3/17/2016.
- */
+
 public class RandomMove extends Movesound {
     private int timer;
     private boolean sticky= false,over=false,under=false;
@@ -23,7 +21,6 @@ public class RandomMove extends Movesound {
         super.onCreate();
         randomsens();
        // draw();
-
         handler.post(draw());
 
 
@@ -35,7 +32,7 @@ public class RandomMove extends Movesound {
     }
     private void randomsens() {
         Random s = new Random();
-        timing = new CountDownTimer(8000,(s.nextInt(3000-800)+800)) {
+        timing = new CountDownTimer(8000,(s.nextInt(3000-900)+900)) {
             @Override
             public void onTick(long millisUntilFinished) {
                 Random r = new Random();
