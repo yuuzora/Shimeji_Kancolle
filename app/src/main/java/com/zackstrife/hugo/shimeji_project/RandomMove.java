@@ -32,7 +32,7 @@ public class RandomMove extends Movesound {
     }
     private void randomsens() {
         Random s = new Random();
-        timing = new CountDownTimer(8000,(s.nextInt(3000-900)+900)) {
+        timing = new CountDownTimer(8000,(s.nextInt(3000-1000)+1000)) {
             @Override
             public void onTick(long millisUntilFinished) {
                 Random r = new Random();
