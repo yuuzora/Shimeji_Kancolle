@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/Shimeji_Project_Optimize.iml" filepath="$PROJECT_DIR$/Shimeji_Project_Optimize.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Shimeji_Yuudachi.iml" filepath="$PROJECT_DIR$/Shimeji_Yuudachi.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>

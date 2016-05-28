@@ -1,22 +1,20 @@
 package com.zackstrife.hugo.shimeji_project;
 
-import android.app.ActionBar;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
-import android.sax.StartElementListener;
-import android.support.v7.app.AppCompatActivity;
+import android.content.ServiceConnection;
+import android.media.AudioManager;
 import android.os.Bundle;
-import android.view.SurfaceView;
+import android.os.IBinder;
+import android.provider.Settings;
+import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
-import android.view.ViewManager;
-import android.view.Window;
 import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.FrameLayout;
-import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -24,74 +22,72 @@ import android.widget.Toast;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
-    private ListView Moods;
-    private Button Start, Stop;
-    private Adapter Mainadapter;
-    private ArrayList<String> Moodlist;
-    private int test;
-    private Toast behave;
-    public final static String INFO = "data";
+    private boolean mIsBound;
+    private boolean mBound = false;
+    private Shimeji mBoundService;
+
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        Moods = (ListView)findViewById(R.id.List);
-        Moods.setOnItemClickListener(new Checkmood());
-        Start = (Button)findViewById(R.id.Start);
-        Stop = (Button)findViewById(R.id.Stop);
-        ArrayList<String> Moodlist = new ArrayList<String>();
-        Moodlist.add("Idle");
-        Moodlist.add("Idle - mute");
-        Moodlist.add("Random Behavior");
-        Mainadapter = new ArrayAdapter<String>(this,R.layout.listviewwhite, Moodlist);
-        Moods.setAdapter((ListAdapter) Mainadapter);
-
-        Moods.setItemChecked(2, true);
-
-
+        doBindService();
+        Intent i = new Intent(this, Shimeji.class);
+        startService(i);
+        if (getIntent().getIntExtra("destroy", 0) == 1){
+            stopService(new Intent(getBaseContext(), Shimeji.class));
+        }
+        finish();
     }
-        public class Checkmood implements AdapterView.OnItemClickListener{
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                test = position;
 
-                    if (test ==0) {
 
-                        behave.makeText(MainActivity.this, "Idle" , Toast.LENGTH_SHORT).show();
-                    }
-                    else if (test ==1) {
 
-                        behave.makeText(MainActivity.this, "Idle - mute" , Toast.LENGTH_SHORT).show();
-                    }
-                    else if (test ==2) {
-
-                        behave.makeText(MainActivity.this, "Random behavior" , Toast.LENGTH_SHORT).show();
-
-                    }
-
+    private ServiceConnection mConnection = new ServiceConnection() {
+        public void onServiceConnected(ComponentName className, IBinder service) {
+            // This is called when the connection with the service has been
+            // established, giving us the service object we can use to
+            // interact with the service.  Because we have bound to a explicit
+            // service that we know is running in our own process, we can
+            // cast its IBinder to a concrete class and directly access it.
+            mBoundService = ((Shimeji.LocalBinder)service).getService();
+            mBound = true;
+            // Tell the user about this for our demo.
+            Intent intent = getIntent();
+            if (intent.getIntExtra("tag", 0) == 1){
+                mBoundService.pause();
+            }
+            if (intent.getIntExtra("mute", 0) == 1){
+                mBoundService.Mute();
             }
         }
 
-
-        public void StartShimeji(View view){
-            //Pass the mode choice to an IntentService, this one will then call the right service
-            Intent launch = new Intent(getBaseContext(), PassingMode.class);
-            launch.putExtra("INFO", test);
-            this.startService(launch);
-
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
         }
+    };
 
+    void doBindService() {
+        // Establish a connection with the service.  We use an explicit
+        // class name because we want a specific service implementation that
+        // we know will be running in our own process (and thus won't be
+        // supporting component replacement by other applications).
+        bindService(new Intent(MainActivity.this,
+                Shimeji.class), mConnection, Context.BIND_AUTO_CREATE);
+        mIsBound = true;
+    }
 
-
-        public void StopShimeji(View view) {
-            ////////Suppress every working service
-            stopService(new Intent(getBaseContext(), Move.class));
-            stopService(new Intent(getBaseContext(), Movesound.class));
-            stopService(new Intent(getBaseContext(), RandomMove.class));
-
-
+    void doUnbindService() {
+        if (mIsBound) {
+            // Detach our existing connection.
+            unbindService(mConnection);
+            mIsBound = false;
         }
+    }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        doUnbindService();
+    }
 }
 
 
